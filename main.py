@@ -26,6 +26,8 @@ corpus_folder = "corpus"
 auxiliar_folder = "auxiliar"
 labeled_intervals_to_wav = "save_labeled_intervals_to_wav_sound_files.praat"
 
+variable = "test" # variable de test para probar git push
+
 def callPraatScript(file_name, script_name=auxiliar_folder + labeled_intervals_to_wav):
     # Check that all the parameters exists
     assert os.path.exists(file_name) and os.path.exists(script_name)
