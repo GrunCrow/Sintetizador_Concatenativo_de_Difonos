@@ -27,17 +27,24 @@ from parselmouth import Sound, praat, TextGrid
 
 #                                                       Constants
 
-# Además, en L hay dos restricciones fonotácticas: el sonido r no puede ser inicial en una frase, ni tampoco puede suceder a una [s].
+#                               DICTIONARY
 
-# dictionary
-v = ["e"]
-c = ["f", "k", "m", "R", "s", "t"]
+# Phones
+v = ["e"]   # vowel -> if with accent = E, without accent = e
+c = ["f", "k", "m", "R", "s", "t"]  # consonants
 
+# syllables
 cv = ["fe", "ke", "me", "re", "se", "te"]
 ccv = ["fre", "kre", "tre"]     # f, k , t + liquid consonant r + vowel (e)
 vc_cvc_ccvc = ["es", "fes", "kes", "mes", "res", "ses", "tes", "fre", "kre", "tre"]    # resultantes de agregar [s] final a los tres tipos anteriores: [es], [fes],[fres], etc.
 
-dictionary = v + cv + ccv +vc_cvc_ccvc
+dictionary = v + cv + ccv + vc_cvc_ccvc
+
+# L there are two phonetic restrictions:
+#       - sound r cannot be initial in a sentence
+#       - sound of r cannot follow an [s]
+
+# one instance of each diphone -> no unit selection when syntetising a new sentence
 
 # ==========================================================================
 
