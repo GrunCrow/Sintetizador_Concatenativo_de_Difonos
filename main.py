@@ -18,20 +18,47 @@ prosodia.
         ii. no reproducir automáticamente el audio.
 '''
 
-#                                   Libraries
+#                                                       Libraries
 import os
 
 # to use praat
 import parselmouth
 from parselmouth import Sound, praat, TextGrid
 
-#                                   Constants
+#                                                       Constants
+
+# Además, en L hay dos restricciones fonotácticas: el sonido r no puede ser inicial en una frase, ni tampoco puede suceder a una [s].
+
+# dictionary
+v = ["e"]
+c = ["f", "k", "m", "R", "s", "t"]
+
+cv = ["fe", "ke", "me", "re", "se", "te"]
+ccv = ["fre", "kre", "tre"]     # f, k , t + liquid consonant r + vowel (e)
+vc_cvc_ccvc = ["es", "fes", "kes", "mes", "res", "ses", "tes", "fre", "kre", "tre"]    # resultantes de agregar [s] final a los tres tipos anteriores: [es], [fes],[fres], etc.
+
+dictionary = v + cv + ccv +vc_cvc_ccvc
+
+# ==========================================================================
+
 corpus_folder = "corpus/"
 auxiliar_folder = "auxiliar/"
 labeled_intervals_to_wav = "save_labeled_intervals_to_wav_sound_files.praat"
 
+#                                                   Auxiliar Functions
+
 # todo generalizar funcion para cualquier script -> meter todos los datos en listas para que corra de cualquier manera
 def callPraatScript(file_name, script_name):
+    '''
+    callPraatScript
+
+    call the Praat Script script_name and runs it on the sound file file_name. It is runned in one by one sound file, so
+    if you want to run it on several sound files, just call it several times on different sound files.
+
+    :param file_name: path + name of the sound file (.wav)
+    :param script_name: path + name of the script file (.praat)
+    :return: resulting_objects: list of objects results of the script
+    '''
     # Check that all the parameters exists
     assert os.path.exists(file_name) and os.path.exists(script_name), "ERROR"
 
@@ -78,3 +105,5 @@ file_name = "auxiliar/manipular-pitch/12345.wav"
 script_name = "auxiliar/save_labeled_intervals_to_wav_sound_files.praat"
 
 resulting_objects = callPraatScript(file_name, script_name)
+
+
