@@ -56,66 +56,36 @@ intname$ = ""
 intervalfile$ = ""
 endoffile = Get finishing time
 
-# ask if the user wants to go through with saving all the files:
-for interval from start_from to end_at
-	xxx$ = Get label of interval... tier interval
-	check = 0
-	if xxx$ = "xxx" and exclude_intervals_labeled_as_xxx = 1
-		check = 1
-	endif
-	if xxx$ = "" and exclude_empty_labels = 1
-		check = 1
-	endif
-	if left$ (xxx$,1) = "." and exclude_intervals_starting_with_dot = 1
-		check = 1
-	endif
-	if check = 0
-	   files = files + 1
-	endif
-endfor
-interval = 1
-pause 'files' sound files will be saved. Continue?
-
 # Loop through all intervals in the selected tier of the TextGrid
 for interval from start_from to end_at
 	select TextGrid 'gridname$'
 	intname$ = ""
 	intname$ = Get label of interval... tier interval
-	check = 0
-	if intname$ = "xxx" and exclude_intervals_labeled_as_xxx = 1
-		check = 1
-	endif
-	if intname$ = "" and exclude_empty_labels = 1
-		check = 1
-	endif
-	if left$ (intname$,1) = "." and exclude_intervals_starting_with_dot = 1
-		check = 1
-	endif
-	if check = 0
-		intervalstart = Get starting point... tier interval
-			if intervalstart > margin
-				intervalstart = intervalstart - margin
-			else
-				intervalstart = 0
-			endif
-	
-		intervalend = Get end point... tier interval
-			if intervalend < endoffile - margin
-				intervalend = intervalend + margin
-			else
-				intervalend = endoffile
-			endif
-	
-		select Sound 'soundname$'
-		Extract part... intervalstart intervalend Rectangular 1.0 yes
-		filename$ = intname$
-		intervalfile$ = "'folder$'" + "'prefix$'" + "'filename$'" + "'suffix$'" + ".wav"
-		indexnumber = 0
-		while fileReadable (intervalfile$)
-			indexnumber = indexnumber + 1
-			intervalfile$ = "'folder$'" + "'prefix$'" + "'filename$'" + "'suffix$''indexnumber'" + ".wav"
-		endwhile
-		Write to WAV file... 'intervalfile$'
-		Remove
-	endif
+
+	intervalstart = Get starting point... tier interval
+		if intervalstart > margin
+			intervalstart = intervalstart - margin
+		else
+			intervalstart = 0
+		endif
+
+	intervalend = Get end point... tier interval
+		if intervalend < endoffile - margin
+			intervalend = intervalend + margin
+		else
+			intervalend = endoffile
+		endif
+
+	select Sound 'soundname$'
+	Extract part... intervalstart intervalend Rectangular 1.0 yes
+	filename$ = intname$
+	intervalfile$ = "'folder$'" + "'prefix$'" + "'filename$'" + "'suffix$'" + ".wav"
+	indexnumber = 0
+	while fileReadable (intervalfile$)
+		indexnumber = indexnumber + 1
+		intervalfile$ = "'folder$'" + "'prefix$'" + "'filename$'" + "'suffix$''indexnumber'" + ".wav"
+	endwhile
+	Write to WAV file... 'intervalfile$'
+	Remove
+
 endfor

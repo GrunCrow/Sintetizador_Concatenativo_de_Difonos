@@ -59,31 +59,21 @@ labeled_intervals_to_wav = "save_labeled_intervals_to_wav_sound_files.praat"
 #                                                   Auxiliar Functions
 
 # todo generalizar funcion para cualquier script -> meter todos los datos en listas para que corra de cualquier manera
-def callPraatScript(file_name, script_name):
-    """
-    callPraatScript
-
-    call the Praat Script script_name and runs it on the sound file file_name. It is run in one by one sound file, so
-    if you want to run it on several sound files, just call it several times on different sound files.
-
-    :param file_name: path + name of the sound file (.wav)
-    :param script_name: path + name of the script file (.praat)
-    :return: resulting_objects: list of objects results of the script
-    """
+def callPraatScript(file_name, script_name, start_interval, end_interval):
     # Check that all the parameters exists
     assert os.path.exists(file_name) and os.path.exists(script_name), "ERROR"
 
     # constant parameters for the script
     tier = 1  # (int) Which IntervalTier in this TextGrid would you like to process?
-    start_from = 1  # (int) Starting at which interval?
-    end_at = 0  # (int) ending at which interval?
-    exclude_empty_labels = True  # (boolean)
-    exclude_intervals_labeled_as_xxx = True  # (boolean)
-    exclude_intervals_starting_with_dot = True  # (boolean)
-    positive_margin = 0.0001  # (float) Give a small margin for the files if you like (seconds)
-    sentence_folder = "corpus/"  # Give the folder where to save the sound files
-    sentence_prefix = "TMP_"  # Give an optional prefix for all filenames:
-    sentence_suffix = ""  # Give an optional suffix for all filenames (.wav will be added anyway):
+    Start_from = start_interval  # (int) Starting at which interval?
+    End_at = end_interval  # (int) ending at which interval?
+    Exclude_empty_labels = True  # (boolean)
+    Exclude_intervals_labeled_as_xxx = True  # (boolean)
+    Exclude_intervals_starting_with_dot = True  # (boolean)
+    positive_Margin = 0.0001  # (float) Give a small margin for the files if you like (seconds)
+    sentence_Folder = "tests/"  # Give the folder where to save the sound files
+    sentence_Prefix = "test"  # Give an optional prefix for all filenames:
+    sentence_Suffix = ""  # Give an optional suffix for all filenames (.wav will be added anyway):
 
     # parameters = [tier, Start_from, End_at, Exclude_empty_labels, Exclude_intervals_labeled_as_xxx,
     #              Exclude_intervals_starting_with_dot, positive_Margin, sentence_Folder, sentence_Prefix,
@@ -92,30 +82,20 @@ def callPraatScript(file_name, script_name):
     snd = Sound(file_name)
     # snd.save("tests/test.wav","WAV")
 
-    tgt = TextGrid(0, 1, "Mary John bell", "bell")
+    tgt = TextGrid(start_interval, end_interval, "Mary John bell", "bell")
     # tgt.save("tests/test.TextGrid")
 
     objects = [tgt, snd]
 
-    # So everything before the script (script_name) are selected objects, everything after are arguments to this
-    # form
-    resulting_objects = praat.run_file(objects, script_name, tier, start_from, end_at, exclude_empty_labels,
-                                       exclude_intervals_labeled_as_xxx, exclude_intervals_starting_with_dot,
-                                       positive_margin, sentence_folder, sentence_prefix, sentence_suffix)
-
-    # assert that resulting_objects is not empty
-    assert resulting_objects
-
-    # if we want to save the results in the folder tests/Results_idx + .TextGrid
-    for idx, resulting_object in enumerate(resulting_objects):
-        resulting_objects[idx].save("tests/result_" + str(idx) + ".TextGrid")
-
-    return resulting_objects
+    # So the everything before the script (script_name) are selected objects, Everything after are arguments to this form
+    praat.run_file(objects, script_name, tier, Start_from, End_at, Exclude_empty_labels,
+                   Exclude_intervals_labeled_as_xxx, Exclude_intervals_starting_with_dot,
+                   positive_Margin, sentence_Folder, sentence_Prefix, sentence_Suffix)
 
 
 # test the function
-file_name = "auxiliar/manipular-pitch/12345.wav"
+file_name = "Frases para Extracción de Difonos/Efre.mp3"
 script_name = "auxiliar/save_labeled_intervals_to_wav_sound_files.praat"
 
-resulting_textgrid = callPraatScript(file_name, script_name)
-print(resulting_textgrid)
+callPraatScript(file_name, script_name, 0.937, 1)
+
