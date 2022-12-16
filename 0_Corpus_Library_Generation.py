@@ -36,12 +36,6 @@ dictionary = v + cv + ccv + vc_cvc_ccvc
 
 # one instance of each diphone -> no unit selection when synthesising a new sentence
 
-# ==========================================================================
-
-corpus_folder = "corpus/"
-auxiliar_folder = "auxiliar/"
-labeled_intervals_to_wav = "save_labeled_intervals_to_wav_sound_files.praat"
-
 
 #                                                   Auxiliar Functions
 
