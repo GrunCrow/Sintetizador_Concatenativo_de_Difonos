@@ -19,6 +19,7 @@
 import os
 import shutil
 import sys
+import math
 
 # to use praat
 import parselmouth
@@ -150,22 +151,79 @@ def create_sound(text, textfile, source, destination):
     shutil.copyfile(source_wav, result_dir)
 
 
+def modify_prosody(textfile):
+    name = textfile.split(".")[0]
+
+    os.system("Praat.exe" +
+              " ." + os.sep + script_folder + os.sep + "extraer-pitch-track.praat" +
+              " .." + os.sep + "synthetized" + os.sep + "results" + os.sep + textfile +   # from where to take the source
+              " .." + os.sep + "synthetized" + os.sep + "results" + os.sep + name + ".PitchTier 50 400")  # where to save it
+
+    file = open(synthetized_folder + os.sep + "results" + os.sep + name + ".PitchTier", "r")
+
+    lines = []
+
+    for line in file:
+        lines.append(line)
+
+    Pointsline = lines[5].split(" = ")
+    PointsNum = Pointsline[1]
+
+    start = 0
+    end = math.floor(float(PointsNum) * 0.2)
+
+    for i in range(start, end):
+        l = 8 + (3 * (i))
+        data = lines[l].split(" = ")
+        value = data[1]
+        finalValue = float(value) + (5 * (i + 1))
+        lines[l] = data[0] + " = " + str(finalValue) + "\n"
+
+    start = math.floor(float(PointsNum) * 0.7)
+    end = int(PointsNum)
+
+    for i in range(start, end):
+        l = 8 + (3 * (i))
+        data = lines[l].split(" = ")
+        valor = data[1]
+        finalValue = float(value) + (11 * (i + 1))
+        lines[l] = data[0] + " = " + str(finalValue) + "\n"
+
+    praat = ""
+    for i in range(0, len(lines)):
+        praat += lines[i]
+
+    # write PitchTier modified file
+    f = open(synthetized_folder + os.sep + "results" + os.sep + name + "_modified.PitchTier", "w")
+    f.write(praat)
+    f.close()
+
+    os.system(
+        "Praat.exe " +
+        script_folder + os.sep + "reemplazar-pitch-track.praat" +
+        " .." + os.sep + "synthetized" + os.sep + "results" + os.sep + textfile +
+        " .." + os.sep + "synthetized" + os.sep + "results" + os.sep + name + "_modified.PitchTier" +
+        " .." + os.sep + "synthetized" + os.sep + "results" + os.sep + name + "_modified.wav 50 400")
+
+
 # flag to check if the sentence is a prosody
 prosody = False
 
 # empty trash from folder where to save the audios (tmp folder)
 empty_folder(tmp_synthetized_folder)
+empty_folder(synthetized_folder + os.sep + "results")
 
 # ask for text
 text = input("\nInserte el texto a reproducir : ")
-prosody = "?" in text
 
 # check that the number of arguments is as expected
 assert len(sys.argv) != 3,\
     "Error en el número de argumentos, deben ser 2"
 
+prosody = "?" in text
+
 if prosody:
-    text.split("?")[0]
+    text = text.split("?")[0]
 
 # filename with the requested text audio
 textfile = str(text + ".wav")
@@ -181,4 +239,13 @@ source = os.getcwd() + os.sep + corpus_folder
 
 create_sound(text, textfile, source, destination)
 
+
+if prosody:
+    modify_prosody(textfile)
+else:
+    name = textfile.split(".")[0]
+    os.system("Praat.exe" +
+              " ." + os.sep + script_folder + os.sep + "extraer-pitch-track.praat" +
+              " .." + os.sep + "synthetized" + os.sep + "results" + textfile +
+              " .." + os.sep + "results" + os.sep + name + ".PitchTier 50 400")
 
