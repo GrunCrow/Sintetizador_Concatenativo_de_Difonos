@@ -90,7 +90,10 @@ def check_constraints(text, corpus_folder=corpus_folder, praat_scripts=script_fo
     return found, string_to_find
 
 
-def create_sound(text, textfile, praat, praat2, source, destination):
+def create_sound(text, textfile, source, destination):
+    praat = ""
+    praat2 = ""
+
     # for every diphone in the string text
     for i in range(0, len(text)):
         diphone = text[i]
@@ -176,9 +179,6 @@ assert not constraints, "La cadena introducida no cumple con los requisitos del 
 destination = os.getcwd() + os.sep + synthetized_folder
 source = os.getcwd() + os.sep + corpus_folder
 
-praat = ""
-praat2 = ""
-
-create_sound(text, textfile, praat, praat2, source, destination)
+create_sound(text, textfile, source, destination)
 
 
