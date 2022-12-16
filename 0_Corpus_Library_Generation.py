@@ -1,21 +1,7 @@
 '''
-1. TODO Diseñar y grabar el inventario de sonidos (difonos), en mono, 16kHz, 16 bits.
-2. TODO En Praat, etiquetar los difonos en una capa de intervalos (interval tier) en un archivo TextGrid.
-3. TODO Recortar los difonos y generar un archivo wav para cada uno.
-4. TODO Crear un programa que, dada una secuencia de fonos, concatene los archivos de los
-difonos correspondientes, genere un archivo wav y (de ser necesario) modifique su
-prosodia.
-
-    • El programa debe funcionar en modo batch (no interactivo), recibiendo como
-    únicos argumentos la secuencia de fonos a sintetizar y el nombre del archivo
-    wav a crear. Ejemplo:
-
-    python tts.py EsemeketrEfe? /tmp/output.wav
-
-    • La salida debe guardarse como un archivo wav (mono, 16kHz, 16 bits).
-    • TODO El programa tendrá además dos opciones
-        i.  Reproducir automáticamente el audio
-        ii. no reproducir automáticamente el audio.
+1. Diseñar y grabar el inventario de sonidos (difonos), en mono, 16kHz, 16 bits.
+2. En Praat, etiquetar los difonos en una capa de intervalos (interval tier) en un archivo TextGrid.
+3. Recortar los difonos y generar un archivo wav para cada uno.
 '''
 
 # Instalación de bibliotecas
@@ -60,6 +46,11 @@ labeled_intervals_to_wav = "save_labeled_intervals_to_wav_sound_files.praat"
 #                                                   Auxiliar Functions
 
 def empty_folder(folder):
+    '''
+    Delete all files in the folder
+    :param folder:
+    :return:
+    '''
     for filename in os.listdir(folder):
         file_path = os.path.join(folder, filename)
         try:
@@ -224,8 +215,8 @@ def create_diphones(path_to_files, script_name, saving_folder):
     marks_files = get_files_from_folder(path_to_files, ".marks")
 
     '''marks_files = []
-    f1 = "Frases para Extracción de Difonos/Efre.marks"
-    f2 = "Frases para Extracción de Difonos/emEkre.marks"
+    f1 = "auxiliar/Frases para Extracción de Difonos/Efre.marks"
+    f2 = "auxiliar/Frases para Extracción de Difonos/emEkre.marks"
     marks_files.append(f1)
     marks_files.append(f2)'''
 
@@ -235,7 +226,7 @@ def create_diphones(path_to_files, script_name, saving_folder):
 
         file = file.replace(".marks", ".mp3")
 
-        filename = file.split("/")[1].replace(".mp3", "")
+        filename = file.split("/")[2].replace(".mp3", "")
 
         start, end, next_start, next_end = get_parameters_from_dictionary(file_content_dictionary, 14)
 
@@ -284,14 +275,13 @@ def create_diphones(path_to_files, script_name, saving_folder):
 
 
 #                                           RUN THE PROGRAM
-path_to_files = "Frases para Extracción de Difonos/"
+path_to_files = "auxiliar/Frases para Extracción de Difonos/"
 script_name = "auxiliar/save_labeled_intervals_to_wav_sound_files.praat"
 saving_folder = "diphones/"
 
-
-
 folder = "auxiliar/" + saving_folder
 
+# As diphones are already created we wont run it again, so we will comment those lines, to generate them, decomment
 empty_folder(folder)
-
 create_diphones(path_to_files, script_name, saving_folder)
+
