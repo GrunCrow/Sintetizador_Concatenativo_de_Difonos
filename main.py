@@ -22,6 +22,7 @@ prosodia.
 
 #                                                       Libraries
 import os
+import shutil
 
 # to use praat
 import parselmouth
@@ -57,6 +58,17 @@ labeled_intervals_to_wav = "save_labeled_intervals_to_wav_sound_files.praat"
 
 
 #                                                   Auxiliar Functions
+
+def empty_folder(folder):
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 def get_files_from_folder(folder, ext):
     audiofiles = []
@@ -112,7 +124,7 @@ def get_marks_content(file):
 def get_parameters_from_dictionary(content_dictionary, line_to_start=14):
     n_file_lines = len(content_dictionary["time"])
 
-    value = []
+    # value = []
     start_time = []
     end_time = []
 
@@ -120,7 +132,7 @@ def get_parameters_from_dictionary(content_dictionary, line_to_start=14):
     for line in range(line_to_start, n_file_lines - 1):
         if content_dictionary["type"][line] != "word":
 
-            value.append(content_dictionary["value"][line])
+            # value.append(content_dictionary["value"][line])
 
             start_time.append((int(content_dictionary["time"][line])) / 1000)
             end_time.append(int((content_dictionary["time"][line + 1])) / 1000)
@@ -132,15 +144,53 @@ def get_parameters_from_dictionary(content_dictionary, line_to_start=14):
     next_start_time = ((int(content_dictionary["time"][line + 1])) / 1000)
     next_end_time = (int((content_dictionary["time"][line + 2])) / 1000)
 
-    return value, start_time, end_time, next_start_time, next_end_time
+    return start_time, end_time, next_start_time, next_end_time
 
 
-def callPraatScript(file_name, script_name, tier, start_interval, end_interval, folder, saving_name):
+def fix_diphones(start, end):
+    for idx in range(0, len(start)):
+
+        end_item = (start[idx] + end[idx]) / 2
+
+        if idx != 0:
+            start_item = end[idx-1]
+        else:
+            start_item = start[idx]
+
+        if idx + 1 == len(start):
+            start.append(end_item)
+            end.append(end[idx])
+
+        start[idx] = start_item
+        end[idx] = end_item
+
+    return start, end
+
+
+def fix_value(values):
+
+    aux = None
+    for idx, value in enumerate(values):
+        if idx != 0:
+            value_item = aux + value
+            aux = value
+        else:
+            value_item = value
+            aux = value
+
+        values[idx] = value_item
+
+    values.append(value)
+
+    return values
+
+
+def callPraatScript(file_name, script_name, start_interval, end_interval, folder, saving_name):
     # Check that all the parameters exists
     assert os.path.exists(file_name) and os.path.exists(script_name), "ERROR"
 
     # constant parameters for the script
-    tier = tier  # (int) Which IntervalTier in this TextGrid would you like to process?
+    tier = 1  # (int) Which IntervalTier in this TextGrid would you like to process?
     Start_from = start_interval  # (int) Starting at which interval?
     End_at = end_interval  # (int) ending at which interval?
     Exclude_empty_labels = True  # (boolean)
@@ -168,59 +218,80 @@ def callPraatScript(file_name, script_name, tier, start_interval, end_interval, 
                    Exclude_intervals_labeled_as_xxx, Exclude_intervals_starting_with_dot,
                    positive_Margin, sentence_Folder, sentence_Prefix, sentence_Suffix)
 
+#                                               MAIN FUNCTIONS
+def create_diphones(path_to_files, script_name, saving_folder):
 
-# test the function
+    marks_files = get_files_from_folder(path_to_files, ".marks")
+
+    '''marks_files = []
+    f1 = "Frases para Extracción de Difonos/Efre.marks"
+    f2 = "Frases para Extracción de Difonos/emEkre.marks"
+    marks_files.append(f1)
+    marks_files.append(f2)'''
+
+    for file in marks_files:
+
+        file_content_dictionary = get_marks_content(file)
+
+        file = file.replace(".marks", ".mp3")
+
+        filename = file.split("/")[1].replace(".mp3", "")
+
+        start, end, next_start, next_end = get_parameters_from_dictionary(file_content_dictionary, 14)
+
+        # print(start, end)
+
+        # to change values from the array to start - start+end/2
+        start, end = fix_diphones(start, end)
+
+        # print(start, end)
+
+        assert len(start) == len(end)
+
+        value = []
+        for item in filename:
+            value.append(item)
+
+        value = fix_value(value)
+
+        assert len(value) == len(start)
+
+        file.replace(".mp3", "")
+
+        print("====================================================")
+        print(filename)
+        print("====================================================")
+        # process all
+        for idx in range(len(start)):
+            if idx < len(value):
+                phone = value[idx]
+
+            saving_name = filename + "_" + str(idx) + "_" + phone
+
+            '''diphone_to_check = saving_name.split(str(idx))[1] + ".wav"
+            print(diphone_to_check)'''
+
+            # print(idx, saving_name)
+
+            print(phone, round(float(start[idx]), 3), round(float(end[idx]), 3))
+
+            callPraatScript(file, script_name, float(start[idx]), float(end[idx]), saving_folder, saving_name)
+
+            '''if (idx+1) % 2 == 0:
+                tier = tier + 1'''
+        print("\n")
+            # callPraatScript(file, script_name, float(start[idx]), float(end[idx]), saving_folder, saving_name)
+
+
+#                                           RUN THE PROGRAM
 path_to_files = "Frases para Extracción de Difonos/"
-marks_files = get_files_from_folder(path_to_files, ".marks")
-
 script_name = "auxiliar/save_labeled_intervals_to_wav_sound_files.praat"
 saving_folder = "diphones/"
 
-marks_files = []
-f1 = "Frases para Extracción de Difonos/Efre.marks"
-f2 = "Frases para Extracción de Difonos/emEkre.marks"
-marks_files.append(f1)
-marks_files.append(f2)
 
-for file in marks_files:
 
-    file_content_dictionary = get_marks_content(file)
+folder = "auxiliar/" + saving_folder
 
-    file = file.replace(".marks", ".mp3")
+empty_folder(folder)
 
-    filename = file.split("/")[1].replace(".mp3", "")
-
-    value, start, end, next_start, next_end = get_parameters_from_dictionary(file_content_dictionary, 14)
-
-    print(start, end)
-
-    # to change values from the array to start - start+end/2
-    for idx in range(0, len(start)):
-
-        end_item = (start[idx] + end[idx]) / 2
-        if idx != 0:
-            start_item = end[idx-1]
-        else:
-            start_item = start[idx]
-
-        start[idx] = start_item
-        end[idx] = end_item
-
-    print(start, end)
-
-    file.replace(".mp3", "")
-
-    # process all
-    tier = 1
-    for idx, phone in enumerate(value):
-        saving_name = filename + "_" + phone
-        print(idx, saving_name)
-
-        print(phone, round(float(start[idx]), 3), round(float(end[idx]), 3), tier)
-
-        callPraatScript(file, script_name, tier, round(float(start[idx]), 3), round(float(end[idx]), 3), saving_folder, saving_name)
-
-        '''if (idx+1) % 2 == 0:
-            tier = tier + 1'''
-
-        # callPraatScript(file, script_name, float(start[idx]), float(end[idx]), saving_folder, saving_name)
+create_diphones(path_to_files, script_name, saving_folder)

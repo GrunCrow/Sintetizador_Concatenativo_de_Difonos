@@ -37,6 +37,7 @@ gridname$ = selected$ ("TextGrid", 1)
 soundname$ = selected$ ("Sound", 1)
 select TextGrid 'gridname$'
 numberOfIntervals = Get number of intervals... tier
+numberOfIntervals = 5
 if start_from > numberOfIntervals
 	exit There are not that many intervals in the IntervalTier!
 endif
